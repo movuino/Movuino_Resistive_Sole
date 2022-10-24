@@ -2,17 +2,17 @@
 #define _MOVUINOESP32_RESISTIVESOLE_
 
 // Touch surface
-#define  ROWS  4
-#define  COLS  6
+#define  SOLEROWS  4
+#define  SOLECOLS  6
 // Pins 
-int row[ROWS] = {27, 26, 25, 33};
-int col[COLS] = {32, 39, 35, 38, 37, 34};
+int row[SOLEROWS] = {27, 26, 25, 33};
+int col[SOLECOLS] = {32, 39, 35, 38, 37, 34};
 
 class MovuinoResistiveSole
 {
 private:
-	int _rows = ROWS; //Number of rows
-	int _cols = COLS; //Number of columns
+	int _rows = SOLEROWS; //Number of rows
+	int _cols = SOLECOLS; //Number of columns
 	
 	int _sensorValue = 0; 
 	
@@ -45,7 +45,7 @@ MovuinoResistiveSole::~MovuinoResistiveSole(){
 
 void MovuinoResistiveSole::begin()
 {
-	for(int i = 0; i < ROWS; i++){
+	for(int i = 0; i < SOLEROWS; i++){
 		pinMode(row[i], OUTPUT);
 		digitalWrite(row[i], LOW);
 	}
