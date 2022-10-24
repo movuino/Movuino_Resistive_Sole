@@ -7,11 +7,6 @@ class DataPoint {
   private IntList rawVals;               // array list to store each new incoming raw data
   private int N = 10;                    // size of the list
   private float curSmoothVal = 0.0;      // current smooth data = mean of the current raw data list
-  private float oldSmoothVal = 0.0;      // last smooth data
-  private float curDerivVal = 0.0f;      // difference between current and previous smooth data
-  private float smoothValOffset = 0.0;   // reference data value
-  public float curSRelativeVal = 0.0;    // curSmoothVal offset from smoothValOffset (curSRelativeVal = curSmoothVal - smoothValOffset)
-  public float curRemapVal = 0.0;        // remap data based on the entire row, range between 0.0 and 1.0
   
   DataPoint(int indRow_, int indCol_) {
     // Compute center of data point coordinated based on row and column index
@@ -41,18 +36,11 @@ class DataPoint {
     }
     
     if(this.rawVals.size() > 0){
-      this.updateDataVals();        // update all data vals based on new incoming raw data 
+      this.getSmoothVal();          // call function to smooth raw data 
     }
   }
   
   //----------------------------------------------------------------------------
-  
-  private void updateDataVals(){
-    this.getSmoothVal();          // call function to smooth raw data
-    this.getSmoothRelativeVal();  // call function to get the smooth relative data
-    this.getDerivVal();           // call function to get derivative of current data
-  }
-  
   public float getSmoothVal(){
     // Compute mean of last N incoming data
     int meanVal_ = 0;
@@ -63,40 +51,15 @@ class DataPoint {
     return this.curSmoothVal;
   }
   
-  private void getSmoothRelativeVal(){
-    this.curSRelativeVal = this.curSmoothVal - this.smoothValOffset; // offset data value
-  }
-  
-  private void getDerivVal(){
-    this.curDerivVal = this.curSmoothVal - this.oldSmoothVal;
-    this.oldSmoothVal = this.curSmoothVal;
-  }
-  
   //----------------------------------------------------------------------------
   
-  void setOffsetValue(){
-    this.smoothValOffset = this.curSmoothVal; // set current value as reference value
-  }
-  
-  //----------------------------------------------------------------------------
-  
-  void shiftRawVal(){
-    // Update data list to keep a stable data flow
-    if(this.rawVals.size() >= N){
-      this.rawVals.append(this.rawVals.get(this.rawVals.size()-1)); // duplicate last value
-      this.rawVals.remove(0); // remove first value
-    }
+  void display(int maxValue_, int maxDiameter_) {
+    float relativeVal_ = this.curSmoothVal / float(maxValue_);
+    relativeVal_ = constrain(relativeVal_, 0.0, 1.0);
     
-    // Call functions to update values
-    this.updateDataVals();        // update all data vals based on new incoming raw data
-  }
-  
-  //----------------------------------------------------------------------------
-  
-  void display(int maxDiameter_) {
-    fill(getLerpColor(this.curRemapVal)); // get color point
+    fill(getLerpColor(relativeVal_)); // get color point
     noStroke();
-    float d_ = this.curRemapVal * maxDiameter_;
+    float d_ = relativeVal_ * maxDiameter_;
     ellipse(this.X,this.Y,d_,d_);
   }
   

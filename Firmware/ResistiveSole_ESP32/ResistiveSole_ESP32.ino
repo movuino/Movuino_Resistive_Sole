@@ -1,10 +1,11 @@
-#include "_MOVUINO_SHIELDS/_ResistiveSole.h"
+// #include "_MOVUINO_SHIELDS/_ResistiveSole.h"
+#include "_MOVUINO_SHIELDS/_ResistiveMatrix.h"
 
 //Force Sensitive Resistive Sole dimensions
 #define ROWS 4
 #define COLS 6
 
-MovuinoResistiveSole sole = MovuinoResistiveSole();
+MovuinoResistiveMatrix sole = MovuinoResistiveMatrix(ROWS, COLS);
 
 void setup()
 {
@@ -17,6 +18,9 @@ void loop()
 {
   sole.update();
   sendRawData();
+
+  // to test signle data
+  // Serial.println(sole.getValue(0,0));
 }
 
 void sendRawData(){

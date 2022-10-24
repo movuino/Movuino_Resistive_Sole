@@ -32,6 +32,9 @@ public class ArduinoSerial implements Runnable {
 
               for (int i = 0; i < COLS; i++) {
                 pointGrid[rowIndex_][i].pushNewRawVal(rowtouch_[i+1]);
+                
+                // PRINT DATA
+                println(rowIndex_ + " " + i + " = " + rowtouch_[i+1]);
               }
             }
             dataCounter++;
@@ -39,7 +42,7 @@ public class ArduinoSerial implements Runnable {
           default:
             break;
           }
-          serialData_ = "";
+          serialData = "";
         }
       }
       delay(1);

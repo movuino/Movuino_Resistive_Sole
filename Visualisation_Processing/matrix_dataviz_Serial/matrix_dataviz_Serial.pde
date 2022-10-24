@@ -15,6 +15,7 @@ color purple = color(73, 81, 208);
 color white = color(255, 255, 255);
 
 // Size
+int maxValue = 1024;
 int maxDiameter = 75;       // Max range to display data point
 
 // Sensors
@@ -61,8 +62,8 @@ void setup()
   // Set Table 
   table = new Table();
   table.addColumn("time");
-  for (int i = 0; i < ROWS; i++){
-    for (int j = 0; j < COLS; j++){
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLS; j++) {
       colId = "x" + str(j) + "y" + str(i);
       table.addColumn(colId);
     }
@@ -70,12 +71,12 @@ void setup()
 
   // Set serial communication with touch sensors
   printArray(Serial.list());
-  String portName = Serial.list()[0];
+  String portName = Serial.list()[1];
   myPort = new Serial(this, portName, 115200); // initialize serial communication
   arduinoSerial = new ArduinoSerial();
   serialThread = new Thread(arduinoSerial);
   serialThread.start();                       // start serial thread
- 
+
   timerDataCounter0 = millis();
 
   myPort.clear();
@@ -87,53 +88,29 @@ void draw()
 
   play.displayOnOff(isOnOff);
   rec.displayRecord(isRecording);
-  
-  // Update values at each draw even if no new values are coming to generate smooth animation
+
+  // Display data points
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
-      pointGrid[i][j].shiftRawVal();
+      pointGrid[i][j].display(maxValue, maxDiameter); // display data point
     }
   }
 
-  // Remap and display data points
-  for (int i = 0; i < ROWS; i++) {
-    // Get row data range
-    float minRow_ = 1000.0;
-    float maxRow_ = 0.0;
-    int sumRow_ = 0;
-    for (int j = 0; j < COLS; j++) {
-      sumRow_ += pointGrid[i][j].curSRelativeVal;
-
-      if (minRow_ > pointGrid[i][j].curSRelativeVal) {
-        minRow_ = pointGrid[i][j].curSRelativeVal;
-      }
-      if (maxRow_ < pointGrid[i][j].curSRelativeVal) {
-        maxRow_ = pointGrid[i][j].curSRelativeVal;
-      }
-    }
-
-    // Get remap values for the current row and display data point
-    for (int j = 0; j < COLS; j++) {
-      pointGrid[i][j].curRemapVal = (pointGrid[i][j].curSRelativeVal - minRow_) / (maxRow_ - minRow_);
-      pointGrid[i][j].curRemapVal *= sumRow_;
-      //pointGrid[i][j].curRemapVal 4096.0; // 12-bit ADC (for full range values)
-      pointGrid[i][j].curRemapVal /= 500.0; // for finger testing
-      pointGrid[i][j].curRemapVal = constrain(pointGrid[i][j].curRemapVal, 0.0, 1.0);
-
-      pointGrid[i][j].display(maxDiameter); // display data point
-      
-      //Recording the dataPoints' smooth values
-      if(isRecording){
-        if (i == 0  && j == 0){
+  //Recording the dataPoints' smooth values
+  if (isRecording) {
+    for (int i = 0; i < ROWS; i++) {
+      for (int j = 0; j < COLS; j++) {
+        if (i == 0  && j == 0) {
           newRow = table.addRow();
-          newRow.setFloat("time",(float)(millis() - time_sec)/1000);
+          newRow.setFloat("time", (float)(millis() - time_sec)/1000);
         }
         String id = "x" + str(j) + "y" + str(i);
         newRow.setInt(id, (int)pointGrid[i][j].getSmoothVal());
-      }       
+      }
     }
   }
 
+  // For debug
   if (millis() - timerDataCounter0 > 1000) {
     println("serial speed = ", int(1000 * dataCounter / (millis() - timerDataCounter0)), "data/seconde");
     timerDataCounter0 = millis();
@@ -141,44 +118,42 @@ void draw()
   }
 }
 
-void mouseClicked(){
+void mouseClicked() {
   if (mouseX > button_x1 - button_d/2 && mouseX < button_x1 + button_d/2 && 
-      mouseY > button_y1 - button_d/2 && mouseY < button_y1 + button_d/2){ 
-    if(isOnOff){
+    mouseY > button_y1 - button_d/2 && mouseY < button_y1 + button_d/2) { 
+    if (isOnOff) {
       isOnOff = false;
       play.displayOnOff(isOnOff);
       myPort.write('S'); //Stop sending data
-    }
-    else{
+    } else {
       isOnOff = true;
       play.displayOnOff(isOnOff);
       myPort.write('G'); //Go and start sending data
     }
   } 
   if (mouseX > button_x2 - button_d/2 && mouseX < button_x2 + button_d/2 && 
-      mouseY > button_y2 - button_d/2 && mouseY < button_y2 + button_d/2){ 
-    if(isRecording){
+    mouseY > button_y2 - button_d/2 && mouseY < button_y2 + button_d/2) { 
+    if (isRecording) {
       recordCount++;
       isRecording = false;
       rec.displayRecord(isRecording);
       String fileName = "data/record" + str(recordCount) + ".csv";
       saveTable(table, fileName);
       table.clearRows();
-    }
-    else{
+    } else {
       isRecording = true;
       time_sec = millis();
       rec.displayRecord(isRecording);
     }
-  } 
+  }
 }
 
 void serialEvent(Serial myPort) {
   String message = myPort.readStringUntil(13);
-  
+
   if (message != null)
   {
-    //println(message);
+    // println(message);
     serialData = message;
     //serialData = message.substring( 0, message.length()-1 ); // remove 'q' character
     myPort.clear();

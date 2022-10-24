@@ -57,7 +57,7 @@ void MovuinoResistiveSole::update()
    for (int i = 0; i < this->_rows; i++) {
  
 	//ACTIVATE ROW
-    digitalWrite(row[i], 1);
+    digitalWrite(row[i], HIGH);
 
     // READ LINE VALUES
     for (int j = 0; j < this->_cols; j++) {
@@ -65,7 +65,7 @@ void MovuinoResistiveSole::update()
     }
 	
     //DEACTIVATE ROW
-    digitalWrite(row[i], 0);
+    digitalWrite(row[i], LOW);
   }
 }
 
