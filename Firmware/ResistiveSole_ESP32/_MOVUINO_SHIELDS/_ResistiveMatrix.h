@@ -2,32 +2,22 @@
 #define _MOVUINOESP32_RESISTIVEMATRIX_
 
 // row MUX pins
-// #define S0 13
-// #define S1 4
-// #define S2 15
-// #define S3 14
-// #define SIG_pin 12
-#define S0 33
-#define S1 32
-#define S2 26
-#define S3 27
-#define SIG_pin 25
-int controlPin[] = {S0, S1, S2, S3};
+#define S0 13
+#define S1 4
+#define S2 15
+#define S3 14
+#define pinSigRow 12
+int rowCtrlPin[] = {S0, S1, S2, S3};
 
 // col MUX pins
-// #define A 33
-// #define B 32
-// #define C 26
-// #define D 27
-// #define COM 25
-#define A 13
-#define B 4
-#define C 15
-#define D 14
-#define COM 12
+#define A 33
+#define B 32
+#define C 26
+#define D 27
+#define pinSigCol 25
+int colCtrlPin[] = {A, B, C, D};
 
-int muxChannel[16][4] = {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 1, 0}, {0, 1, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 1}, {1, 0, 0, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 0, 1, 1}, {1, 0, 1, 1}, {0, 1, 1, 1}, {1, 1, 1, 1}};
-// int muxChannelRows[16][4] = {{0, 0, 1, 0}, {1, 0, 1, 0}, {0, 1, 1, 0}, {1, 1, 1, 0}, {0, 0, 1, 0}, {1, 0, 1, 0}, {0, 1, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 1}, {1, 0, 0, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 0, 1, 1}, {1, 0, 1, 1}, {0, 1, 1, 1}, {1, 1, 1, 1}};
+int muxChannel[16][4] = {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 1, 0}, {1, 0, 1, 0}, {0, 1, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 1}, {1, 0, 0, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 0, 1, 1}, {1, 0, 1, 1}, {0, 1, 1, 1}, {1, 1, 1, 1}};1, 1}};
 
 class MovuinoResistiveMatrix
 {
@@ -74,12 +64,12 @@ void MovuinoResistiveMatrix::begin()
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   pinMode(S3, OUTPUT);
-  pinMode(SIG_pin, INPUT);
+  pinMode(pinSigRow, OUTPUT);
   digitalWrite(S0, LOW);
   digitalWrite(S1, LOW);
   digitalWrite(S2, LOW);
   digitalWrite(S3, LOW);
-  digitalWrite(SIG_pin, 0); // Pull down
+  digitalWrite(pinSigRow, LOW);
 
   //--------------------------------
   //------MULTIPLEXER col-----------
@@ -88,46 +78,45 @@ void MovuinoResistiveMatrix::begin()
   pinMode(B, OUTPUT);
   pinMode(C, OUTPUT);
   pinMode(D, OUTPUT);
-  pinMode(COM, OUTPUT);
+  pinMode(pinSigCol, INPUT);
   digitalWrite(A, LOW);
   digitalWrite(B, LOW);
   digitalWrite(C, LOW);
   digitalWrite(D, LOW);
-  digitalWrite(COM, LOW);
+  digitalWrite(pinSigCol, 0);  // Pull down
 }
 
 void MovuinoResistiveMatrix::update()
 {
-  for (int col = 0; col < this->_cols; col++)
+  for (int row = 0; row < this->_rows; row++)
   {
-
-    digitalWrite(A, muxChannel[col][0]);
-    digitalWrite(B, muxChannel[col][1]);
-    digitalWrite(C, muxChannel[col][2]);
-    digitalWrite(D, muxChannel[col][3]);
-
-    // ACTIVATE col
-    digitalWrite(COM, HIGH);
-
-    // READ LINE VALUES
-    for (int row = 0; row < this->_rows; row++)
+    for (int i = 0; i < 4; i++)
     {
-      _lastUpdate[col][row] = readMux(row);
+      digitalWrite(rowCtrlPin[i], muxChannel[row][i]);
+    } // read the value at the SIG pin
+
+    // ACTIVATE row
+    digitalWrite(pinSigRow, HIGH);
+
+    // READ COL VALUES
+    for (int col = 0; col < this->_cols; col++)
+    {
+      _lastUpdate[col][row] = readMux(col);
     }
 
-    // DEACTIVATE col
-    digitalWrite(COM, LOW);
+    // DEACTIVATE row
+    digitalWrite(pinSigRow, LOW);
   }
 }
 
-int MovuinoResistiveMatrix::readMux(int row)
+int MovuinoResistiveMatrix::readMux(int col)
 {
   for (int i = 0; i < 4; i++)
   {
-    digitalWrite(controlPin[i], muxChannel[row][i]);
+    digitalWrite(colCtrlPin[i], muxChannel[col][i]);
   } // read the value at the SIG pin
 
-  int val = analogRead(SIG_pin); // return the value
+  int val = analogRead(pinSigCol); // return the value
   return val;
 }
 

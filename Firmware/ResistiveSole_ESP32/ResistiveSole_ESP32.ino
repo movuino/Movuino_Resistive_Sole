@@ -2,8 +2,8 @@
 #include "_MOVUINO_SHIELDS/_ResistiveMatrix.h"
 
 //Force Sensitive Resistive Sole dimensions
-#define COLS 7 // 7
-#define ROWS 15 // 15
+#define COLS 7 // NOTE (first shield): plug 5, 6, 7 pins on 12, 13, 14 of the resistive matrix shield
+#define ROWS 15
 
 MovuinoResistiveMatrix sole = MovuinoResistiveMatrix(COLS, ROWS);
 

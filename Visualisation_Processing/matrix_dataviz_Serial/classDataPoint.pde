@@ -2,10 +2,14 @@ class DataPoint {
   // COORDINATES
   public float X;      // X coordinate of the data point
   public float Y;      // Y coordinate of the data point
+  
+  // TO REMOVE
+  public int indRow;
+  public int indCol;
 
   // DATA VALUES
   private IntList rawVals;               // array list to store each new incoming raw data
-  private int N = 1;                    // size of the list
+  private int N = 3;                    // size of the list
   private float curSmoothVal = 0.0;      // current smooth data = mean of the current raw data list
 
   DataPoint(int indCol_, int indRow_) {
@@ -22,6 +26,9 @@ class DataPoint {
     float h_ = height - 2 * panning_;
     this.X = panning_ + (indCol_)/float(COLS-1) * w_;
     this.Y = panning_ + h_ * (1 - (indRow_)/float(ROWS-1));
+    
+    this.indRow = indRow_;
+    this.indCol = indCol_;
 
     this.rawVals = new IntList(); // initialize raw data list
   }
@@ -66,6 +73,7 @@ class DataPoint {
     noStroke();
     float d_ = relativeVal_ * maxDiameter_;
     ellipse(this.X, this.Y, d_, d_);
+    // ellipse(this.X, this.Y, 2 + this.indCol, 2 + this.indRow);
   }
 
   //----------------------------------------------------------------------------

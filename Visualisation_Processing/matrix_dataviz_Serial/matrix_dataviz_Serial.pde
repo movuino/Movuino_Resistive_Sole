@@ -20,8 +20,8 @@ int maxDiameter = 75;       // Max range to display data point
 
 // Sensors
 DataPoint[][] pointGrid;    // Array of data points from the touch surface
-int ROWS = 15; // 15;              // number of data point on X axis for touch surface
-int COLS = 7; // 7;              // number of data point on Y axis for touch surface
+int COLS = 7; // 7;         // number of data point on X axis for touch surface
+int ROWS = 15; // 15;       // number of data point on Y axis for touch surface
 int dataCounter = 0;        // count number of incoming data
 long timerDataCounter0 = 0; // timer to compute incoming data rate
 
@@ -48,7 +48,7 @@ int h = ROWS*100 + 2*button_d + 10;
 void setup()
 {
   // Set size
-  size(500, 900);
+  size(400, 900);
   maxDiameter = int(width / float(COLS) - 10);
 
   // Set data point grid
