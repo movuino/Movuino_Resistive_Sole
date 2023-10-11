@@ -5,17 +5,24 @@ class DataPoint {
   
   // DATA VALUES
   private IntList rawVals;               // array list to store each new incoming raw data
-  private int N = 10;                    // size of the list
+  private int N = 2;                    // size of the list
   private float curSmoothVal = 0.0;      // current smooth data = mean of the current raw data list
   
   DataPoint(int indRow_, int indCol_) {
     // Compute center of data point coordinated based on row and column index
-    float w_ = COLS * maxDiameter;
-    float h_ = ROWS * maxDiameter;
-    float x0 = (width - w_)/2. + maxDiameter/2.;
-    float y0 = (height - h_)/2. + maxDiameter/2.;
-    this.X = x0 + indCol_ * maxDiameter;
-    this.Y = y0 + indRow_ * maxDiameter;
+    //float w_ = COLS * maxDiameter;
+    //float h_ = ROWS * maxDiameter;
+    //float x0 = (width - w_)/2. + maxDiameter/2.;
+    //float y0 = (height - h_)/2. + maxDiameter/2.;
+    //this.X = x0 + indCol_ * maxDiameter;
+    //this.Y = y0 + indRow_ * maxDiameter;
+    
+    int panning_ = 50;
+    float w_ = width - 2 * panning_;
+    float h_ = height - 2 * panning_;
+    this.X = panning_ + (indCol_)/float(COLS-1) * w_;
+    this.Y = panning_ + h_ * (1 - (indRow_)/float(ROWS-1));
+
     
     this.rawVals = new IntList(); // initialize raw data list
   }
