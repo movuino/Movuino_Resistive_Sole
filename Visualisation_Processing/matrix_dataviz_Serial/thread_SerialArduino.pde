@@ -1,7 +1,7 @@
 public class ArduinoSerial implements Runnable {
   Thread thread;
   private long timer0;
-  
+
   public ArduinoSerial() {
     timer0 = millis();
   }
@@ -16,33 +16,36 @@ public class ArduinoSerial implements Runnable {
       // Update values based on incoming serial messages
       String serialData_ = serialData;
 
-      if (serialData_ != "") {
+      if (serialData_ != "" && serialData_.length() > 1) {
         serialData_ = serialData_.trim();
+        if (serialData_.length() > 1) {
+          char adr_ = serialData_.charAt(0);
+          //println(adr_);
+          if (serialData_.length() > 3) {
+            serialData_ = serialData_.substring(1, serialData_.length());
 
-        char adr_ = serialData_.charAt(0);
-        if (serialData_.length() > 3) {
-          serialData_ = serialData_.substring(1, serialData_.length());
+            switch(adr_) {
+            case 'z' :
+              // GET COORDINATES
+              int[] rowtouch_ = int(split(serialData_, 'x'));
+              if (rowtouch_.length == COLS + 1) {
+                int rowIndex_ = int(rowtouch_[0]);
 
-          switch(adr_) {
-          case 'z' :
-            // GET COORDINATES
-            int[] rowtouch_ = int(split(serialData_, 'x'));
-            if (rowtouch_.length == COLS + 1) {
-              int rowIndex_ = int(rowtouch_[0]);
-
-              for (int i = 0; i < COLS; i++) {
-                pointGrid[rowIndex_][i].pushNewRawVal(rowtouch_[i+1]);
-                
-                // PRINT DATA
-                println(rowIndex_ + " " + i + " = " + rowtouch_[i+1]);
+                for (int i = 0; i < COLS; i++) {
+                  pointGrid[i][rowIndex_].pushNewRawVal(rowtouch_[i+1]);
+                  //pointGrid[i][rowIndex_].pushNewRawVal(40);
+                  
+                  // PRINT DATA
+                  // println(rowIndex_ + " " + i + " = " + rowtouch_[i+1]);
+                }
               }
+              dataCounter++;
+              break;
+            default:
+              break;
             }
-            dataCounter++;
-            break;
-          default:
-            break;
+            serialData = "";
           }
-          serialData = "";
         }
       }
       delay(1);

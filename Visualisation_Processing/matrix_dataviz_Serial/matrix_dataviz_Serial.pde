@@ -20,8 +20,8 @@ int maxDiameter = 75;       // Max range to display data point
 
 // Sensors
 DataPoint[][] pointGrid;    // Array of data points from the touch surface
-int ROWS = 4;              // number of data point on X axis for touch surface
-int COLS = 6;              // number of data point on Y axis for touch surface
+int ROWS = 15; // 15;              // number of data point on X axis for touch surface
+int COLS = 7; // 7;              // number of data point on Y axis for touch surface
 int dataCounter = 0;        // count number of incoming data
 long timerDataCounter0 = 0; // timer to compute incoming data rate
 
@@ -34,7 +34,7 @@ float time_sec = 0;
 int recordCount = 0;
 
 //Record button parameters
-int button_d = 30;
+int button_d = 1;
 int button_x1 = 10 + button_d/2;
 int button_y1 = 10 + button_d/2;
 int button_x2 = button_x1 + 3*button_d/2;
@@ -48,13 +48,13 @@ int h = ROWS*100 + 2*button_d + 10;
 void setup()
 {
   // Set size
-  size(600, 450);
+  size(500, 900);
   maxDiameter = int(width / float(COLS) - 10);
 
   // Set data point grid
-  pointGrid = new DataPoint[ROWS][COLS];
-  for (int i = 0; i < ROWS; i++) {
-    for (int j = 0; j < COLS; j++) {
+  pointGrid = new DataPoint[COLS][ROWS];
+  for (int i = 0; i < COLS; i++) {
+    for (int j = 0; j < ROWS; j++) {
       pointGrid[i][j] = new DataPoint(i, j);
     }
   }
@@ -62,8 +62,8 @@ void setup()
   // Set Table 
   table = new Table();
   table.addColumn("time");
-  for (int i = 0; i < ROWS; i++) {
-    for (int j = 0; j < COLS; j++) {
+  for (int i = 0; i < COLS; i++) {
+    for (int j = 0; j < ROWS; j++) {
       colId = "x" + str(j) + "y" + str(i);
       table.addColumn(colId);
     }
@@ -71,7 +71,7 @@ void setup()
 
   // Set serial communication with touch sensors
   printArray(Serial.list());
-  String portName = Serial.list()[1];
+  String portName = Serial.list()[2];
   myPort = new Serial(this, portName, 115200); // initialize serial communication
   arduinoSerial = new ArduinoSerial();
   serialThread = new Thread(arduinoSerial);
@@ -90,16 +90,16 @@ void draw()
   rec.displayRecord(isRecording);
 
   // Display data points
-  for (int i = 0; i < ROWS; i++) {
-    for (int j = 0; j < COLS; j++) {
+  for (int i = 0; i < COLS; i++) {
+    for (int j = 0; j < ROWS; j++) {
       pointGrid[i][j].display(maxValue, maxDiameter); // display data point
     }
   }
 
   //Recording the dataPoints' smooth values
   if (isRecording) {
-    for (int i = 0; i < ROWS; i++) {
-      for (int j = 0; j < COLS; j++) {
+    for (int i = 0; i < COLS; i++) {
+      for (int j = 0; j < ROWS; j++) {
         if (i == 0  && j == 0) {
           newRow = table.addRow();
           newRow.setFloat("time", (float)(millis() - time_sec)/1000);
@@ -112,7 +112,7 @@ void draw()
 
   // For debug
   if (millis() - timerDataCounter0 > 1000) {
-    println("serial speed = ", int(1000 * dataCounter / (millis() - timerDataCounter0)), "data/seconde");
+    // println("serial speed = ", int(1000 * dataCounter / (millis() - timerDataCounter0)), "data/seconde");
     timerDataCounter0 = millis();
     dataCounter = 0;
   }
